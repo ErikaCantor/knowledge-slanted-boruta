@@ -1,0 +1,15 @@
+^kslboruta\.Rproj$
+^\.Rproj\.user$
+.codecov.yml
+.gitlab-ci.yml
+.git
+webpage
+side
+.gitignore
+README.md
+.aux$
+.log$
+.bbl$
+.blg$
+^doc$
+^Meta$

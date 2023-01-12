@@ -1,0 +1,44 @@
+Package: kslboruta
+Title: Modified knowledge-slanted implementation to support boruta method
+Version: 0.0.2
+Date: 2022-12-28
+Authors@R:
+    c(
+        person(
+            given = "Erika", family = "Cantor",
+            email = "erika.cantor@postgrado.uv.cl",
+            role = c("aut", "cre"),
+		        comment = c(ORCID = "0000-0003-3320-6032")
+        )
+    )
+Maintainer: Erika Cantor <erika.cantor@postgrado.uv.cl>
+Description:
+    The Biological knowledge-slanted random forest implementation 
+    is modified to support boruta method.
+    Additional helper functions are also provided.
+Depends:
+    R (>= 4.2),
+    purrr,
+    ranger,
+    diffusr,
+    dplyr,
+    ggplot2,
+    tidyverse,
+    ggpubr,
+    ROCR,
+    pROC,
+    future,
+    future.apply
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+License: GPL (>= 3)
+LazyData: yes
+URL: https://github.com/ErikaCantor/knowledge-slanted-boruta
+BugReports: https://github.com/ErikaCantor/knowledge-slanted-boruta/issues/
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+VignetteBuilder: knitr
+Encoding: UTF-8
+Config/testthat/edition: 3
