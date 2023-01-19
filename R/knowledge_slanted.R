@@ -1,36 +1,62 @@
 #' knowledge_slanted
 #'
-#' @name knowledge_slanted
-#' @rdname knowledge_slanted
-#' @aliases knowledge_slanted slanted ks
+#' The knowledge-slanted RF approach to identify genes potentially implicated
+#' with CAVS in patients
 #'
-#' @param train Training data of class \code{data.frame}, \code{matrix}
+#' @description The knowledge-slanted RF approach to identify genes potentially implicated
+#' with CAVS in patients with congenital bicuspid aortic valve (BAV) and
+#' tricuspid aortic valve (TAV) in comparison with patients having normal valves,
+#' using a knowledge-slanted random forest (RF).
+#'
+#' @param data Training data of class \code{data.frame}, \code{matrix}
 #' @param ntree Number of trees.
 #' @param mtry Number of variables to possibly split at in each node.
 #' @param weights Numeric vector with weights between 0 and 1
-#' @param \ldots further arguments passed to [`ranger()`].
+#' @param \ldots further arguments to be passed to or from other methods especially
+#'  - \code{test = data.frame}, to predict the values based on the previous data
+#'  - \code{do.metrics = TRUE}, to list different metrics that were added to your model (error S E auc F1)
 #'
 #' @seealso [`ranger()`]
+#' @seealso [`kspredict()`]
+#' @seealso [`ksmetrics()`]
+#' @references
+#' Biological knowledge-slanted random forest approach
+#' for the classification of calcified aortic valve stenosis
+#' 10.1186/s13040-021-00269-4
 #'
+#'
+#' @importFrom methods hasArg
 #' @import ranger
 #' @export
-knowledge_slanted <- function(train, ntree, mtry, weights, ...){
+knowledge_slanted <- function(
+    data=NULL,
+    ntree,
+    mtry,
+    weights,
+    ...
+    ){
 
-  rf <- ranger::ranger(y ~ .,
-                       num.trees=ntree,
-                       mtry=mtry,
-                       dependent.variable.name=y,
-                       data = train,
-                       split.select.weights=weights,
-                       seed=23,
-                       classification=TRUE,
-                       probability=TRUE,
-                       ...
+  # outcome variable check
+  if(!("y" %in% names(data))){
+    stop("Missing outcome as variable. Set outcome as variable as y")
+  }
+  # normalization
+  if (sum(weights) != 1) weights <- weights / sum(weights)
+
+  rf <- ranger::ranger(
+      y ~ .,
+      num.trees=ntree,
+      mtry=mtry,
+      dependent.variable.name=y,
+      data = data,
+      split.select.weights=weights,
+      classification=TRUE,
+      probability=TRUE,
+      verbose =FALSE,
+      ...
   )
-  errors <-  FALSE
-  auc <-  FALSE
+  predictions <-  NULL
   performance <- NULL
-  if(hasArg(errors)) errors <- TRUE
   error_train <- rf$prediction.error
   slanted=list(
     "forest"=rf,
@@ -41,7 +67,7 @@ knowledge_slanted <- function(train, ntree, mtry, weights, ...){
   class(slanted) <- "kslanted"
   if(hasArg(test)){
     test <- list(...)$test
-    slanted <- kspredict(slanted, data=test, do.metrics=TRUE, ...)
+    slanted <- kspredict(slanted, data=test, ...)
   }
   return(slanted)
 }

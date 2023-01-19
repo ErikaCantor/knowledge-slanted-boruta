@@ -1,18 +1,17 @@
 #' random walk prior
 #' @description
-#' 'rw_prior' perform random walk with restart
+#' 'kswalk' perform random walk with restart
 #'
 #' @param data `data.frame`
+#' @param graph `data.frame`
 #' @param seednodes `data.frame`
 #' @return `random walk` object
-#'
-#' @seealso
-#' [`random.walk`]
-#'
+#' @param \ldots further arguments passed to `random.walk`
 #'
 #' @import diffusr
+#' @importFrom methods hasArg
 #' @export
-rw_prior<-function(data, graph, seednodes, ...){
+kswalk<-function(data, graph, seednodes, ...){
   # number of genes or nodes
   p <- NULL
   if(hasArg(p)) p <- list(...)$p
@@ -47,7 +46,7 @@ rw_prior<-function(data, graph, seednodes, ...){
   ## Probability of each node is a candidate gene.
   ## Candidate generated from the random walk proposal dist.
   candidates  <- diffusr::random.walk(p0, graph,r=r, niter = niter, thresh = thresh)
-  class(candidates) <- "rw_priorized"
+  class(candidates) <- "kswalk"
   return(candidates)
 }
 

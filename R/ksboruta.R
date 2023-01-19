@@ -1,4 +1,4 @@
-#' boruta_method
+#' ksboruta
 #'
 #' Runs a feature selection function
 #'
@@ -9,13 +9,13 @@
 #' @param data Training data of class \code{data.frame} or \code{matrix}
 #' @param ntree `integer(1)` number of tree.
 #' @param mtry `integer(1)` number of Variables randomly chosen at each split
-#' @param selected variables selected
+#' @param weights numeric vector with weights between 0 and 1.
+#' @param trace verbose. 0 means no tracing, 1 means decision about each attribute, 2 means the same as 1, plus reporting step by step,
 #' @param \ldots further arguments passed to [`ranger()`].
 #'
 #' @return `ks` object, see [`knowledge_slanted()`] for details.
 #'
-#' @seealso
-#' [`knowledge_slanted()`]
+#' @seealso [`knowledge_slanted()`]
 #'
 #' @references
 #' Biological knowledge-slanted random forest approach
@@ -28,44 +28,53 @@
 #' @import tidyverse
 #' @import purrr
 #' @import ROCR
+#' @importFrom methods hasArg
 #' @export
-boruta_method <- function(data, ntree, mtry, selected, ...){
+ksboruta <- function(data, ntree, mtry, weights, trace=FALSE, ...){
 
-  # number of genes or nodes
+  # number of vars
   p <- NULL
+  #Convert x into a data.frame
+  if(!is.data.frame(data))
+    data<-data.frame(data)
+
   if(hasArg(p)) p <- list(...)$p
   else p <- ncol(data)-1
   if( p > ncol(data)) stop(paste("p must be a number between 1 and", ncol(data)))
-  shadows <- sapply(data[,-1], sample)
-  ndata <- cbind(data, shadows)
+  shadows <- future.apply::future_sapply(data[,-1], FUN=sample, future.seed = NULL)
+  newdata <- cbind(data, shadows)
+  if (sum(weights) != 1) weights <- weights / sum(weights)
 
-  weights <- (rep(weights, 2)/ (1/p))/(2*p)
-  colnames(ndata) <- c('y', paste('X', seq(1, p), sep=''), paste('S', seq(1, p), sep=''))
+  # to include shadow and non-shadow weights
+  if(length(newdata) > length(weights) + 1) weights <- (rep(weights, 2)/ (1/p))/(2*p)
 
+  colnames(newdata) <- c('y', paste('X', seq(1, p), sep=''), paste('S', seq(1, p), sep=''))
   #random forest
+  options(warn = -1);
   rf <- ranger((y) ~. ,
-               data = ndata,
+               data = newdata,
                importance = 'impurity_corrected',
                split.select.weights=weights,
                mtry=mtry,
                num.trees=ntree,
                classification = TRUE,
-               seed=23,
+               verbose =FALSE,
                ...)
-
-  # janitza method for p values
-  pvalues=data.frame(importance_pvalues(rf, method = "janitza"))
-  # cuttoff=MZSA (Maximo p valor de las shadows), uso minimo dado que trabajo con valores p y son más significativos entre más cercanos a 0
-  cuttoff=min(pvalues$pvalue[c(p+1,2*p)])
-  pvalues$hit.data<-rep(0,2*p)
-  pvalues$hit.data[pvalues$pvalue<cuttoff]<-1
-  results=data.frame(hits=pvalues$hit.data[1:p])
-
-  # Hace las nrep por cada datasets
-  # hits <- future.apply::future_lapply(
-  #   seq_len(1:nrep),
-  #   ,
-  #   future.seed = TRUE
-  # )
+  # calculates p-values using janitza method
+  pvalues <-  data.frame(importance_pvalues(rf, method = "janitza"))
+  options(warn = 0);
+  # NOTE: cuttoff = MZSA (Maximo p valor para las shadows),
+  # NOTE: uso minimo dado que trabajo con valores p
+  # NOTE: y son más significativos entre más cercanos a 0
+  cuttoff=min(pvalues$pvalue[c(p+1, 2*p)])
+  pvalues$hit.data<-rep(0, 2*p)
+  pvalues$hit.data[pvalues$pvalue < cuttoff]<-1
+  results=pvalues$hit.data[1:p]
+  if(trace){
+    message(
+      sprintf(
+        '%s are significantly better than shadows',
+        length(results[results!=1]) ))
+  }
   return(results)
 }

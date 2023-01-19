@@ -7,12 +7,15 @@
 #' @description Prediction with test data and a knowledge_slanted result.
 #' @param ksobject A knowledge_slanted object.
 #' @param data test data
+#' @param do.metrics `bool` perform [`ksmetrics()`] if TRUE
 #' @param \ldots further arguments passed to [`predict()`].
 #'
 #' @seealso [`knowledge_slanted()`]
 #' @seealso [`ksmetrics()`]
 #'
 #' @import ranger
+#' @importFrom methods is
+#' @importFrom stats predict
 #' @export
 kspredict <- function(ksobject, data = NULL, do.metrics = FALSE, ...){
 
@@ -22,19 +25,13 @@ kspredict <- function(ksobject, data = NULL, do.metrics = FALSE, ...){
     errors <-  FALSE
     auc <-  FALSE
     performance <- NULL
-    predictions=predict(ksobject$forest, data, type="response", ...)$predictions
-    if(do.metrics) performance <- ksmetrics(ksobject, data, predictions, ...)
-    slanted=list(
-      "forest"=ksobject$forest,
-      "predictions"=predictions,
-      "train_loss"=ksobject$train_loss,
-      "test_loss"=performance
-    )
+    ksobject$predictions = predict(ksobject$forest, data, type="response", ...)$predictions
+    if(do.metrics) ksobject <- ksmetrics(ksobject, data, ksobject$predictions, ...)
     if(do.metrics){
-      class(slanted) <- "kslanted_full"
+      class(ksobject) <- "kslanted_full"
     }else{
-      class(slanted) <- "kslanted_predict"
+      class(ksobject) <- "kslanted_predict"
     }
-    return(slanted)
+    return(ksobject)
   }
 }
