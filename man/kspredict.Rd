@@ -6,12 +6,14 @@
 \alias{ksp}
 \title{kspredict}
 \usage{
-kspredict(ksobject, data = NULL, performance = FALSE, ...)
+kspredict(ksobject, data = NULL, do.metrics = FALSE, ...)
 }
 \arguments{
 \item{ksobject}{A knowledge_slanted object.}
 
 \item{data}{test data}
+
+\item{do.metrics}{\code{bool} perform \code{\link[=ksmetrics]{ksmetrics()}} if TRUE}
 
 \item{\ldots}{further arguments passed to \code{\link[=predict]{predict()}}.}
 }

@@ -2,14 +2,12 @@
 % Please edit documentation in R/knowledge_slanted.R
 \name{knowledge_slanted}
 \alias{knowledge_slanted}
-\alias{slanted}
-\alias{ks}
 \title{knowledge_slanted}
 \usage{
-knowledge_slanted(train, ntree, mtry, weights, ...)
+knowledge_slanted(data = NULL, ntree, mtry, weights, ...)
 }
 \arguments{
-\item{train}{Training data of class \code{data.frame}, \code{matrix}}
+\item{data}{Training data of class \code{data.frame}, \code{matrix}}
 
 \item{ntree}{Number of trees.}
 
@@ -17,11 +15,31 @@ knowledge_slanted(train, ntree, mtry, weights, ...)
 
 \item{weights}{Numeric vector with weights between 0 and 1}
 
-\item{\ldots}{further arguments passed to \code{\link[=ranger]{ranger()}}.}
+\item{\ldots}{further arguments to be passed to or from other methods especially
+\itemize{
+\item \code{test = data.frame}, to predict the values based on the previous data
+\item \code{do.metrics = TRUE}, to list different metrics that were added to your model (error S E auc F1)
+}}
 }
 \description{
-knowledge_slanted
+The knowledge-slanted RF approach to identify genes potentially implicated
+with CAVS in patients with congenital bicuspid aortic valve (BAV) and
+tricuspid aortic valve (TAV) in comparison with patients having normal valves,
+using a knowledge-slanted random forest (RF).
+}
+\details{
+The knowledge-slanted RF approach to identify genes potentially implicated
+with CAVS in patients
+}
+\references{
+Biological knowledge-slanted random forest approach
+for the classification of calcified aortic valve stenosis
+10.1186/s13040-021-00269-4
 }
 \seealso{
 \code{\link[=ranger]{ranger()}}
+
+\code{\link[=kspredict]{kspredict()}}
+
+\code{\link[=ksmetrics]{ksmetrics()}}
 }
