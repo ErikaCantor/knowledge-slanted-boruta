@@ -4,7 +4,7 @@
 \alias{ksboruta}
 \title{ksboruta}
 \usage{
-ksboruta(data, ntree, mtry, weights, trace = FALSE, ...)
+ksboruta(data, ntree, mtry, weights, method = "janitza", trace = 0, ...)
 }
 \arguments{
 \item{data}{Training data of class \code{data.frame} or \code{matrix}}
@@ -14,6 +14,8 @@ ksboruta(data, ntree, mtry, weights, trace = FALSE, ...)
 \item{mtry}{\code{integer(1)} number of Variables randomly chosen at each split}
 
 \item{weights}{numeric vector with weights between 0 and 1.}
+
+\item{method}{Method to compute p-values janitza, or altmann see \code{\link[ranger:importance_pvalues]{ranger::importance_pvalues()}}}
 
 \item{trace}{verbose. 0 means no tracing, 1 means decision about each attribute, 2 means the same as 1, plus reporting step by step,}
 
@@ -36,5 +38,7 @@ for the classification of calcified aortic valve stenosis
 10.1186/s13040-021-00269-4
 }
 \seealso{
+\code{\link[=ranger]{ranger()}}
+
 \code{\link[=knowledge_slanted]{knowledge_slanted()}}
 }

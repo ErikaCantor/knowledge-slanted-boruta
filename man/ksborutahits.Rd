@@ -13,7 +13,7 @@ ksborutahits(
   mtry,
   weights,
   runs = 20,
-  trace = FALSE,
+  trace = 0,
   ...
 )
 }
@@ -42,6 +42,10 @@ ksborutahits(
 ksborutahits to  replicate \emph{ksboruta} method
 }
 \examples{
-ksborutahits(iter=50, method="bonferroni", p_value=0.3, simulated2$train, ntree = 100, mtry = floor(length(simulated2$train) / 3), weights = simulated2$weights, trace=TRUE)
+# basic usage of ksborutahits
+data <- simulated2$train
+mtry <- sqrt(length(data))
+weights <- simulated2$weights
+ksborutahits(iter=50, data=data, ntree = 100, mtry = mtry, weights = weights, trace=TRUE)
 
 }
