@@ -6,6 +6,7 @@
 webpage
 side
 .gitignore
+.editorconfig
 README.md
 .aux$
 .log$

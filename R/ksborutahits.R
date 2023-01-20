@@ -28,7 +28,7 @@ feature_extraction <- function(features, iter, data=NULL,
                                method="bonferroni", p_value=0.05,
                                prob.accept=0.5,
                                prob.reject=0.5,
-                               trace=FALSE, ...) {
+                               trace=0, ...) {
   # TODO: empieza el bloque de caracteristicas paso 6
   # features=data.frame(hits=Reduce("+", r))
   if(length(features) >= length(data)){
@@ -51,15 +51,15 @@ feature_extraction <- function(features, iter, data=NULL,
   features$status[rejected] <- "Rejected"
   features$rowids <- rownames(features)
   features$varnames <- colnames(data %>% select(-y))
-  if(trace){
+  if(trace>0){
     nAcc <- length(features$varnames[accepted])
     nRej <- length(features$varnames[rejected])
     nLeft <- length(nfeatures - (nAcc + nRej))
-    message(sprintf(" confirmed %s attribute%s: [%s]",
+    message(sprintf(">Confirmed %s attribute%s: [%s]",
                     nAcc,ifelse(nAcc==1,'','s'),stringify(features$varnames[accepted])))
-    message(sprintf(" rejected %s attribute%s: [%s]",
+    message(sprintf(">Rejected %s attribute%s: [%s]",
                     nRej,ifelse(nAcc==1,'','s'),stringify(features$varnames[rejected])))
-    message(sprintf(" posible %s attribute%s", nLeft, ifelse(nAcc==1,'','s')))
+    message(sprintf(">Undetermined %s attribute%s", nLeft, ifelse(nAcc==1,'','s')))
   }
   features
 }
@@ -79,7 +79,11 @@ feature_extraction <- function(features, iter, data=NULL,
 #' @import future.apply
 #'
 #' @examples
-#' ksborutahits(iter=50, method="bonferroni", p_value=0.3, simulated2$train, ntree = 100, mtry = floor(length(simulated2$train) / 3), weights = simulated2$weights, trace=TRUE)
+#' # basic usage of ksborutahits
+#' data <- simulated2$train
+#' mtry <- sqrt(length(data))
+#' weights <- simulated2$weights
+#' ksborutahits(iter=50, data=data, ntree = 100, mtry = mtry, weights = weights, trace=TRUE)
 #'
 #' @export
 ksborutahits <- function(
@@ -88,7 +92,7 @@ ksborutahits <- function(
     p_value=0.05,
     data=NULL,
     ntree, mtry, weights,
-    runs=20, trace=FALSE, ...) {
+    runs=20, trace=0, ...) {
 
   #Timer starts... now!
   timeStart<-Sys.time()
@@ -102,9 +106,9 @@ ksborutahits <- function(
 
   options(future.globals.maxSize = +Inf) # improve performance
   results <- future.apply::future_lapply(
-    seq_len(runs),
+    seq_len(runs-1),
     function(i) {
-      if(trace) message(sprintf('iter [%s]', i))
+      if(trace == 2) message(sprintf('iter [%s]', i))
       do.call(
         ksboruta,
         c(
@@ -123,13 +127,11 @@ ksborutahits <- function(
     future.stdout = TRUE
   )
   hits=Reduce("+", results) # FIXME: improve with fold from future.apply
-  # hits
   # Notifying user of our progress
-  if(trace)
+  if(trace>1)
     message(sprintf('main loop start, iter [%s] ...', runs))
   ## Iterative state
-  runs + 1 -> runs
-  if(trace)
+  if(trace>1)
     message(sprintf('iter [%s]',runs))
 
   history <- list()
@@ -141,16 +143,11 @@ ksborutahits <- function(
     p_value=p_value,
     trace = trace
   )
-  # print("Tentative" %in% features$status)
-  # print("Accepted" %in% features$status)
-  # print("Rejected" %in% features$status)
+
   features <- features[features$status!="Rejected",]
   vars <- append("y", features$varnames)
   rowids <- features$rowids
-  # print("vars")
-  # print(vars)
-  # print("rowids")
-  # print(rowids)
+
   nwdata <- data %>% select(as.factor(vars))
   nwweights <- weights[as.factor(rowids)]
   nwhits <- hits
@@ -160,13 +157,6 @@ ksborutahits <- function(
         && (runs+1-> runs) < iter + 1){ ### max iter == 100 o no hay tentativas (todas aceptadas o rechazadas)
     if(trace)
       message(sprintf('iter [%s]',runs))
-
-    # print("vars")
-    # print(length(vars))
-    # print("nwdata")
-    # print(length(nwdata))
-    # print("nwhits")
-    # print(length(nwhits))
 
     nwresult <- ksboruta(
       data = nwdata,
@@ -178,22 +168,33 @@ ksborutahits <- function(
     nwhits <- Reduce("+", results)
 
     features <- feature_extraction(
-      nwhits[1:length(rowids)],
+      nwhits[as.factor(rowids)],
       iter=runs,
       data=nwdata,
       method=method,
       p_value=p_value,
       trace = trace
     )
-    # print("Tentative" %in% features$status)
-    # print("Accepted" %in% features$status)
-    # print("Rejected" %in% features$status)
     features <- features[features$status!="Rejected",]
     vars <- append("y", features$varnames)
     rowids <- features$rowids
     nwdata <- nwdata %>% select(one_of(vars))
     nwweights <- weights[as.factor(rowids)]
   }
-
-  nwdata
+  timeTaken=Sys.time()-timeStart
+  if(trace>0){
+    cat(
+      paste("performed ",runs," iterations in ",timeTaken," secs.\n")
+    )
+    cat(
+      paste(">", length(nwdata),"attributes confirmed important: ",
+            stringify(colnames(nwdata)),";\n")
+    )
+    undetermined <- data[!(data %in% nwdata)]
+    cat(
+      paste(">", length(undetermined),"attributes confirmed Undetermined: ",
+            stringify(colnames(unimportant)),";\n")
+    )
+  }
+  return(nwdata)
 }
