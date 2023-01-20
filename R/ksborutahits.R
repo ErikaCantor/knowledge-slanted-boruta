@@ -188,12 +188,12 @@ ksborutahits <- function(
     )
     cat(
       paste(">", length(nwdata),"attributes confirmed important: ",
-            stringify(colnames(nwdata)),";\n")
+            stringify(colnames(nwdata)),"\n")
     )
     undetermined <- data[!(data %in% nwdata)]
     cat(
       paste(">", length(undetermined),"attributes confirmed Undetermined: ",
-            stringify(colnames(unimportant)),";\n")
+            stringify(colnames(unimportant)),"\n")
     )
   }
   return(nwdata)
