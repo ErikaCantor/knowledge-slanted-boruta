@@ -108,7 +108,7 @@ ksborutahits <- function(
   results <- future.apply::future_lapply(
     seq_len(runs-1),
     function(i) {
-      if(trace == 2) message(sprintf('iter [%s]', i))
+      if(trace > 1) message(sprintf('iter [%s]', i))
       do.call(
         ksboruta,
         c(
@@ -124,7 +124,7 @@ ksborutahits <- function(
     future.seed = TRUE,
     future.conditions = "message",
     future.globals = FALSE,
-    future.stdout = TRUE
+    future.stdout = FALSE
   )
   hits=Reduce("+", results) # FIXME: improve with fold from future.apply
   # Notifying user of our progress
@@ -134,7 +134,11 @@ ksborutahits <- function(
   if(trace>1)
     message(sprintf('iter [%s]',runs))
 
-  history <- list()
+  if(trace>1){
+    history <- names(data %>% select(-c('y')))
+    history <- as.data.frame(history)
+  }
+
   features <- feature_extraction(
     hits,
     iter= runs,
@@ -153,10 +157,17 @@ ksborutahits <- function(
   nwhits <- hits
 
   # HACK: llamar boruta: iteracion run + 1 to stop condition
-  while(any(features$status=="Tentative")
-        && (runs+1-> runs) < iter + 1){ ### max iter == 100 o no hay tentativas (todas aceptadas o rechazadas)
-    if(trace)
+  while(
+    # any(features$status=="Tentative") &&
+    (runs+1-> runs) < iter + 1
+    ){ ### max iter == 100 o no hay tentativas (todas aceptadas o rechazadas)
+    if(trace>1)
       message(sprintf('iter [%s]',runs))
+
+    if(trace>1){
+      history[,dim(history)[2] + 1] <- nwhits
+      print(length(history))
+    }
 
     nwresult <- ksboruta(
       data = nwdata,
@@ -166,7 +177,6 @@ ksborutahits <- function(
     )
     results <- append(results, nwresult)
     nwhits <- Reduce("+", results)
-
     features <- feature_extraction(
       nwhits[as.factor(rowids)],
       iter=runs,
@@ -196,5 +206,16 @@ ksborutahits <- function(
             stringify(colnames(unimportant)),"\n")
     )
   }
+  if(trace>1){
+    histvalues <- history %>% select(-c('history'))
+    history$mean <- apply(histvalues, 1, mean, na.rm=TRUE)
+    history$median <- apply(histvalues, 1, median, na.rm=TRUE)
+    history$min <- apply(histvalues, 1, min, na.rm=TRUE)
+    history$max <- apply(histvalues, 1, max, na.rm=TRUE)
+    history$decision <- rep("Rejected", dim(df)[1])
+    history$decision[as.factor(history$history)%in% names(nwdata)] <- "Confirmed"
+    cat(history)
+  }
   return(nwdata)
 }
+
