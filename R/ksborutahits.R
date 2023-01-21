@@ -71,7 +71,7 @@ feature_extraction <- function(features, iter, data=NULL,
 #' @param iter maximum number of iterations
 #' @param method adjust method to tune [`stats::p.adjust()`]
 #' @param p_value `number` probability of obtaining test results
-#' @param trace verbose. 0 means no tracing, 1 means decision about each attribute, 2 means the same as 1, plus reporting step by step
+#' @param trace verbose. 0 means no tracing, 1 means decision about each attribute, 2 means the same as 1, plus reporting step by step, 3 show all and var history
 #' @param runs minimum number of iterations. Default value should be used.
 #' @param \ldots further arguments passed to `ksboruta`
 #'
@@ -190,9 +190,9 @@ ksborutahits <- function(
       paste(">", length(nwdata),"attributes confirmed important: ",
             stringify(colnames(nwdata)),"\n")
     )
-    undetermined <- data[!(data %in% nwdata)]
+    unimportant <- data[!(data %in% nwdata)]
     cat(
-      paste(">", length(undetermined),"attributes confirmed Undetermined: ",
+      paste(">", length(unimportant),"attributes unimportant: ",
             stringify(colnames(unimportant)),"\n")
     )
   }

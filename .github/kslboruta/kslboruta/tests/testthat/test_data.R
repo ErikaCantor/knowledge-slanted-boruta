@@ -1,0 +1,26 @@
+## Data
+test_that("loading simulated1 raw data", {
+  data("simulated1")
+  expect_type(simulated1, "list")
+  expect_true(exists('train', where=simulated1))
+  expect_true(exists('test', where=simulated1))
+  expect_type(simulated1$train, "list")
+  expect_type(simulated1$test, "list")
+  expect_equal(dim(simulated1$train)[1],27)
+  expect_equal(dim(simulated1$train)[2],1001)
+  expect_equal(dim(simulated1$test)[1],12)
+  expect_equal(dim(simulated1$test)[2],1001)
+})
+
+test_that("loading simulated2 raw data", {
+  data("simulated2")
+  expect_type(simulated2, "list")
+  expect_true(exists('train', where=simulated2))
+  expect_true(exists('seed', where=simulated2))
+  expect_true(exists('weights', where=simulated2))
+  expect_true(exists('beta', where=simulated2))
+  expect_true(exists('id.p', where=simulated2))
+  expect_type(simulated2$train, "list")
+  expect_equal(dim(simulated2$train)[1],30)
+  expect_equal(dim(simulated2$train)[2],5001)
+})

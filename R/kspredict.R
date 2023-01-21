@@ -18,10 +18,7 @@
 #' @importFrom stats predict
 #' @export
 kspredict <- function(ksobject, data = NULL, do.metrics = FALSE, ...){
-
-  if( !is(ksobject, "kslanted") ){
-    cat("Please choose a knowledge_slanted result.\n")
-  }else{
+  if( is(ksobject, "kslanted") || is(ksobject, "kslanted_predict")){
     errors <-  FALSE
     auc <-  FALSE
     performance <- NULL
@@ -33,5 +30,7 @@ kspredict <- function(ksobject, data = NULL, do.metrics = FALSE, ...){
       class(ksobject) <- "kslanted_predict"
     }
     return(ksobject)
+  }else{
+    stop("Please choose a knowledge_slanted result.\n")
   }
 }

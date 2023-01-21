@@ -36,7 +36,7 @@ ksmetrics <- function(ksobject, data=NULL, predictions, ...){
         F1=sum(slanted[values==1]==1)/(sum(slanted[values==1]==1)+0.5*(sum(slanted[values==0]==1)+sum(slanted[values==1]==0)))
       )
     ksobject$test_loss <- error.test
-    if( is(ksobject,"kslanted_predict")) class(slanted) <- "kslanted_full"
+    if( is(ksobject,"kslanted_predict")) class(ksobject) <- "kslanted_full"
     return(ksobject)
   }else{
     cat("Please choose a knowledge_slanted result.\n")

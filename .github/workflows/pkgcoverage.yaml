@@ -8,7 +8,7 @@ name: pkgcoverage
 
 jobs:
   pkgcoverage:
-    runs-on: macOS-latest
+    runs-on: ubuntu-18.04
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -41,11 +41,7 @@ jobs:
 
       - name: Test coverage
         run: |
-          covr::codecov(
-            quiet = FALSE,
-            clean = FALSE,
-            install_path = file.path(.github/, "package")
-          )
+          covr::codecov(path="tests", quiet=FALSE, clean=FALSE)
         shell: Rscript {0}
 
       - name: Show testthat output
