@@ -14,7 +14,6 @@
 kswalk<-function(data, graph, seednodes, ...){
   # number of genes or nodes
   p <- NULL
-  alfa<-1
   if(hasArg(p)) p <- list(...)$p
   else p <- ncol(data)-1
   if( p > ncol(data)) stop(paste("p must be a number between 1 and", ncol(data)))
@@ -23,14 +22,7 @@ kswalk<-function(data, graph, seednodes, ...){
   p0 <- rep(0.00001, p)
 
   #Set initial probability equal to 1 for seed nodes
-  nodes = setdiff(seq(1, p), seednodes)
-  qtynodes=round(length(seednodes)*alfa)
-
-  if(length(nodes)==0) newnodes=sample(seednodes, qtynodes)
-  else newnodes=c(
-    sample(seednodes, qtynodes),
-    sample(nodes, length(seednodes)-qtynodes)
-  )
+  nodes =  seednodes  
   p0[nodes]<-1
 
   #computation of stationary distribution
