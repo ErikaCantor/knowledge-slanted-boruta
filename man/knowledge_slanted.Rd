@@ -7,7 +7,7 @@
 knowledge_slanted(data = NULL, ntree, mtry, weights, ...)
 }
 \arguments{
-\item{data}{Training data of class \code{data.frame}, \code{matrix}}
+\item{data}{Training data of class \code{data.frame}, \code{matrix}. The result variable must be the first column of \code{data.frame} and labeled \code{y}.}
 
 \item{ntree}{Number of trees.}
 
