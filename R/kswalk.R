@@ -14,6 +14,7 @@
 kswalk<-function(data, graph, seednodes, ...){
   # number of genes or nodes
   p <- NULL
+  alfa<-1
   if(hasArg(p)) p <- list(...)$p
   else p <- ncol(data)-1
   if( p > ncol(data)) stop(paste("p must be a number between 1 and", ncol(data)))
