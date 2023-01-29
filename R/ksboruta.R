@@ -56,7 +56,7 @@ ksboruta <- function(data, ntree, mtry, weights, method = "janitza", trace=0, ..
   )
   # TODO: mtry is null --- remove y
   # TODO: validate mtry is equal to sqrt newdata or sqrt 2p
-  if(mtry == sqrt(p) || is.null(mtry)) mtry <- sqrt(2*p)
+  if(mtry == sqrt(p) || is.null(mtry)) mtry <- floor(sqrt(2*p))
   #random forest
   rf <- ranger((y)~.,
                data = newdata,
