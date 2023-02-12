@@ -1,14 +1,13 @@
 test_that("boruta hits base 20 iter 50", {
   hits <- ksborutahits(
-    iter=100,
+    iter=23,
     method="bonferroni",
-    p_value=0.02,
+    p_value=0.05,
     data=simulated2$train,
-    ntree = 200,
-    mtry = sqrt(length(simulated2$train)), # floor(length(simulated2$train) / 3),
+    ntree = 500,
+    mtry = 10, # floor(length(simulated2$train) / 3),
     weights = simulated2$weights,
-    trace=3,
-    runs=80
+    trace=2
   )
   expect_gt(length(hits), 0)
   expect_type(hits, "list")

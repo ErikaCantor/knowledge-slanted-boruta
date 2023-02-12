@@ -51,15 +51,26 @@ feature_extraction <- function(features, iter, data=NULL,
   features$status[rejected] <- "Rejected"
   features$rowids <- rownames(features)
   features$varnames <- colnames(data %>% select(-y))
+  features <- features %>% na.omit()
   if(trace>0){
-    nAcc <- length(features$varnames[accepted])
-    nRej <- length(features$varnames[rejected])
-    nLeft <- length(nfeatures - (nAcc + nRej))
-    message(sprintf(">Confirmed %s attribute%s: [%s]",
-                    nAcc,ifelse(nAcc==1,'','s'),stringify(features$varnames[accepted])))
-    message(sprintf(">Rejected %s attribute%s: [%s]",
-                    nRej,ifelse(nAcc==1,'','s'),stringify(features$varnames[rejected])))
-    message(sprintf(">Undetermined %s attribute%s", nLeft, ifelse(nAcc==1,'','s')))
+    nAcc <- length(features$status[features$status=="Accepted"])
+    nRej <- length(features$status[features$status=="Rejected"])
+    nLeft <- length(features$status[features$status=="Tentative"])
+    total <-  length(features$status)
+    if(trace>1){
+    #   message(sprintf(">Confirmed %s attribute%s: [%s]",
+    #                   nAcc,ifelse(nAcc==1,'','s'),
+    #                   stringify(features$varnames[accepted])))
+    #   message(sprintf(">Rejected %s attribute%s: [%s]",
+    #                   nRej,ifelse(nAcc==1,'','s'),
+    #                   stringify(features$varnames[rejected])))
+    #   message(sprintf(">Undetermined %s attribute%s", nLeft,
+    #                   ifelse(nAcc==1,'','s')))
+    # }else{
+      message(
+        sprintf("[%s] %s Accepted, %s Rejected, %s Tentative of %s vars",
+                Sys.time(),nAcc, nRej, nLeft, total))
+    }
   }
   features
 }
@@ -92,7 +103,7 @@ ksborutahits <- function(
     p_value=0.05,
     data=NULL,
     ntree, mtry, weights,
-    runs=20, trace=0, ...) {
+    runs=20, trace=3, ...) {
 
   #Timer starts... now!
   timeStart<-Sys.time()
@@ -104,11 +115,15 @@ ksborutahits <- function(
   if(runs < 20)
     stop('maxRuns must be greater than 20.')
 
+  if(trace>0){
+    message(sprintf("[%s] start", timeStart))
+  }
+
   options(future.globals.maxSize = +Inf) # improve performance
   results <- future.apply::future_lapply(
-    seq_len(runs-1),
+    seq_len(runs),
     function(i) {
-      if(trace > 1) message(sprintf('iter [%s]', i))
+      # if(trace > 1) message(sprintf('iter [%s]', i))
       do.call(
         ksboruta,
         c(
@@ -116,8 +131,7 @@ ksborutahits <- function(
             data = data, ntree = ntree,
             mtry = mtry, weights = weights,
             trace = trace
-          ),
-          list(...)
+          )
         )
       )
     },
@@ -127,18 +141,7 @@ ksborutahits <- function(
     future.stdout = FALSE
   )
   hits=Reduce("+", results) # FIXME: improve with fold from future.apply
-  # Notifying user of our progress
-  if(trace>1)
-    message(sprintf('main loop start, iter [%s] ...', runs))
-  ## Iterative state
-  if(trace>1)
-    message(sprintf('iter [%s]',runs))
-
-  if(trace>1){
-    history <- names(data %>% select(-c('y')))
-    history <- as.data.frame(history)
-  }
-
+  #Resultados de 20 variables
   features <- feature_extraction(
     hits,
     iter= runs,
@@ -147,38 +150,52 @@ ksborutahits <- function(
     p_value=p_value,
     trace = trace
   )
-
+  # Seleccionar solo variables en competencia
   features <- features[features$status!="Rejected",]
   vars <- append("y", features$varnames)
   rowids <- features$rowids
-
+  #Corrida 21
+  #Nuevo dataset y nuevos pesos
   nwdata <- data %>% select(as.factor(vars))
-  nwweights <- weights[as.factor(rowids)]
+  nwweights <- cbind(weights[as.integer(rowids)])
   nwhits <- hits
 
+  # Notifying user of our progress
+  if(trace>1){
+    timeTaken=Sys.time()-timeStart
+    message(sprintf('[%s] ends %s iterations block ...', Sys.time(), runs))
+    message(sprintf('[%s] go to loop, runtime %s ...', Sys.time(), timeTaken))
+  }
+
+  if(trace>1){
+    history <- names(data %>% select(-c('y')))
+    history <- as.data.frame(history)
+  }
   # HACK: llamar boruta: iteracion run + 1 to stop condition
   while(
-    # any(features$status=="Tentative") &&
-    (runs+1-> runs) < iter + 1
+    any(features$status=="Tentative")
+    && (runs+1-> runs) < iter + 1
     ){ ### max iter == 100 o no hay tentativas (todas aceptadas o rechazadas)
-    if(trace>1)
-      message(sprintf('iter [%s]',runs))
-
+    if(trace>0){
+      message(sprintf('[%s] %s iteration', Sys.time(), runs))
+    }
     if(trace>1){
       history[,dim(history)[2] + 1] <- nwhits
-      print(length(history))
+      message(sprintf('[%s] add V%s to history', Sys.time(), length(history)))
     }
-
     nwresult <- ksboruta(
       data = nwdata,
       ntree = ntree,
       mtry = sqrt(length(nwdata)),
       weights = nwweights
     )
-    results <- append(results, nwresult)
-    nwhits <- Reduce("+", results)
+    temp <- rep(NA, length(data) - 1)
+    temp[as.integer(rowids)] <- nwresult
+    # nwresult <- append(rep(NA, length(data)-length(nwdata)), nwresult)
+    results <- append(list(temp), results)
+    nwhits=Reduce("+", results) # FIXME: improve with fold from future.apply
     features <- feature_extraction(
-      nwhits[as.factor(rowids)],
+      nwhits[as.integer(rowids)],
       iter=runs,
       data=nwdata,
       method=method,
@@ -189,33 +206,24 @@ ksborutahits <- function(
     vars <- append("y", features$varnames)
     rowids <- features$rowids
     nwdata <- nwdata %>% select(one_of(vars))
-    nwweights <- weights[as.factor(rowids)]
+    nwweights <- weights[as.integer(rowids)]
   }
   timeTaken=Sys.time()-timeStart
+
   if(trace>0){
-    cat(
-      paste("performed ",runs," iterations in ",timeTaken," secs.\n")
-    )
-    cat(
-      paste(">", length(nwdata),"attributes confirmed important: ",
-            stringify(colnames(nwdata)),"\n")
-    )
-    unimportant <- data[!(data %in% nwdata)]
-    cat(
-      paste(">", length(unimportant),"attributes unimportant: ",
-            stringify(colnames(unimportant)),"\n")
-    )
+    message(sprintf('[%s] elapsed time %s', Sys.time(), timeTaken))
   }
+
   if(trace>1){
     histvalues <- history %>% select(-c('history'))
     history$mean <- apply(histvalues, 1, mean, na.rm=TRUE)
     history$median <- apply(histvalues, 1, median, na.rm=TRUE)
     history$min <- apply(histvalues, 1, min, na.rm=TRUE)
     history$max <- apply(histvalues, 1, max, na.rm=TRUE)
-    history$decision <- rep("Rejected", dim(df)[1])
-    history$decision[as.factor(history$history)%in% names(nwdata)] <- "Confirmed"
-    cat(history)
+    history$decision <- rep("Rejected", nrow(history))
+    history$decision[as.integer(rowids)] <- "Non Rejected"
+    print(history)
   }
-  return(nwdata)
+  return(history)
 }
 
