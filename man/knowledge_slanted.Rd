@@ -7,7 +7,7 @@
 knowledge_slanted(data = NULL, ntree, mtry, weights, ...)
 }
 \arguments{
-\item{data}{Training data of class \code{data.frame}, \code{matrix}}
+\item{data}{Training data of class \code{data.frame}, \code{matrix}. The result variable must be the first column of \code{data.frame} and labeled \code{y}.}
 
 \item{ntree}{Number of trees.}
 
@@ -22,19 +22,21 @@ knowledge_slanted(data = NULL, ntree, mtry, weights, ...)
 }}
 }
 \description{
-The knowledge-slanted RF approach to identify genes potentially implicated
-with CAVS in patients with congenital bicuspid aortic valve (BAV) and
-tricuspid aortic valve (TAV) in comparison with patients having normal valves,
-using a knowledge-slanted random forest (RF).
+ This function implements the Knowledge-slanted random forest (RF) for classification tasks.
 }
 \details{
-The knowledge-slanted RF approach to identify genes potentially implicated
-with CAVS in patients
+The knowledge-slanted RF is a combination of two stages as an 
+  attempt to implement a knowledge-guided supervised learning 
+  approach based on the conventional RF. The weights can be given by the user or previously obtained by the kswalk function from a 
+  protein protein interaction network or graph.
+  
 }
 \references{
-Biological knowledge-slanted random forest approach
-for the classification of calcified aortic valve stenosis
-10.1186/s13040-021-00269-4
+Leo Breiman. Random forests. Machine learning, 45(1):5–32, 2001.
+  
+Erika Cantor, Rodrigo Salas, Harvey Rosas, and Sandra Guauque-Olarte.
+Biological knowledge-slanted random forest approach for the classification
+of calcified aortic valve stenosis. BioData Mining, 14(1):1–11, 2021.
 }
 \seealso{
 \code{\link[=ranger]{ranger()}}

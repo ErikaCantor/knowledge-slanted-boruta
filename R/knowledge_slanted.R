@@ -3,10 +3,8 @@
 #' The knowledge-slanted RF approach to identify genes potentially implicated
 #' with CAVS in patients
 #'
-#' @description The knowledge-slanted RF approach to identify genes potentially implicated
-#' with CAVS in patients with congenital bicuspid aortic valve (BAV) and
-#' tricuspid aortic valve (TAV) in comparison with patients having normal valves,
-#' using a knowledge-slanted random forest (RF).
+#' @description The knowledge-slanted RF approach  is a combination of two stages as an attempt to 
+#' implement a knowledge-guided supervised learning approach based on the conventional RF. 
 #'
 #' @param data Training data of class \code{data.frame}, \code{matrix}
 #' @param ntree Number of trees.

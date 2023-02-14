@@ -11,7 +11,7 @@ kswalk(data, graph, seednodes, ...)
 
 \item{graph}{\code{data.frame}}
 
-\item{seednodes}{\code{data.frame}}
+\item{seednodes}{vector with the numbers of the columns of features that are seed nodes}
 
 \item{\ldots}{further arguments passed to \code{random.walk}}
 }
@@ -19,5 +19,5 @@ kswalk(data, graph, seednodes, ...)
 \verb{random walk} object
 }
 \description{
-'kswalk' perform random walk with restart
+'kswalk' performs a random walk with restart in order to obtain the selection probability of each feature for the knowledged-slanted random forest.
 }
