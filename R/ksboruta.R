@@ -77,9 +77,9 @@ ksboruta <- function(data, ntree, mtry, weights, method = "janitza", trace=0, ..
   # NOTE: cuttoff = MZSA (Maximo p valor para las shadows),
   # NOTE: uso minimo dado que trabajo con valores p
   # NOTE: y son más significativos entre más cercanos a 0
-  cuttoff=min(pvalues$pvalue[c(p+1, 2*p)])
+  cuttoff=max(pvalues$importance[c(p+1, 2*p)])
   pvalues$hit.data<-rep(0, 2*p)
-  pvalues$hit.data[pvalues$pvalue < cuttoff]<-1
+  pvalues$hit.data[pvalues$importance > cuttoff]<-1
   results=pvalues$hit.data[1:p]
   if(trace>2){
     message(
