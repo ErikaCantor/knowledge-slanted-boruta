@@ -13,7 +13,7 @@ ksborutahits(
   mtry,
   weights,
   runs = 20,
-  trace = 0,
+  trace = 3,
   ...
 )
 }
@@ -34,7 +34,7 @@ ksborutahits(
 
 \item{runs}{minimum number of iterations. Default value should be used.}
 
-\item{trace}{verbose. 0 means no tracing, 1 means decision about each attribute, 2 means the same as 1, plus reporting step by step}
+\item{trace}{verbose. 0 means no tracing, 1 means decision about each attribute, 2 means the same as 1, plus reporting step by step, 3 show all and var history}
 
 \item{\ldots}{further arguments passed to \code{ksboruta}}
 }
