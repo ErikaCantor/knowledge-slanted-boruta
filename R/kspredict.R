@@ -16,7 +16,7 @@
 #' @import ranger
 #' @importFrom methods is
 #' @importFrom stats predict
-#' @export
+#' @noRd
 kspredict <- function(ksobject, data = NULL, do.metrics = FALSE, ...){
   if( is(ksobject, "kslanted") || is(ksobject, "kslanted_predict")){
     errors <-  FALSE
