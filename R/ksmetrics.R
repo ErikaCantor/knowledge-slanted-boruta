@@ -17,7 +17,7 @@
 #' @import dplyr
 #' @import pROC
 #' @importFrom methods is
-#' @export
+#' @noRd
 ksmetrics <- function(ksobject, data=NULL, predictions, ...){
   if( is(ksobject, "kslanted")  || is(ksobject, "kslanted_predict")){
     if(length(unique(data$y))==1){

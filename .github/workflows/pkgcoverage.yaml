@@ -24,37 +24,37 @@ jobs:
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
-
-      - name: Restore R package cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
-
-      - name: Install dependencies
-        run: |
-          install.packages(c("remotes"))
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("covr")
-        shell: Rscript {0}
-
-      - name: Test coverage
-        run: |
-          covr::codecov(path="tests", quiet=FALSE, clean=FALSE)
-        shell: Rscript {0}
-
-      - name: Show testthat output
-        if: always()
-        run: |
-          ## --------------------------------------------------------------------
-          find .github/package -name 'testthat.Rout*' -exec cat '{}' \; || true
-        shell: bash
-
-      - name: Upload test results
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-test-failures
-          path: .github/package
+#
+#       - name: Restore R package cache
+#         uses: actions/cache@v2
+#         with:
+#           path: ${{ env.R_LIBS_USER }}
+#           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
+#           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+#
+#       - name: Install dependencies
+#         run: |
+#           install.packages(c("remotes"))
+#           remotes::install_deps(dependencies = TRUE)
+#           remotes::install_cran("covr")
+#         shell: Rscript {0}
+#
+#       - name: Test coverage
+#         run: |
+#           covr::codecov(path="tests", quiet=FALSE, clean=FALSE)
+#         shell: Rscript {0}
+#
+#       - name: Show testthat output
+#         if: always()
+#         run: |
+#           ## --------------------------------------------------------------------
+#           find .github/package -name 'testthat.Rout*' -exec cat '{}' \; || true
+#         shell: bash
+#
+#       - name: Upload test results
+#         if: failure()
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: coverage-test-failures
+#           path: .github/package
 

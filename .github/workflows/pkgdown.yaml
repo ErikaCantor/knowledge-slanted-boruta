@@ -31,8 +31,8 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Deploy package
-        run: |
-          git config --local user.email "erika.cantor@postgrado.uv.cl"
-          git config --local user.name "GitHub Actions"
-          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'
+      # - name: Deploy package
+      #   run: |
+      #     git config --local user.email "erika.cantor@postgrado.uv.cl"
+      #     git config --local user.name "GitHub Actions"
+      #     Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'

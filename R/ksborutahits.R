@@ -217,6 +217,7 @@ ksborutahits <- function(
     history$decision[as.integer(rowids)] <- "Accepted"
     print(history)
   }
-  return(list(data=nwdata, history=history))
+
+  return(list(data=nwdata, history=history, result=features$status))
 }
 
